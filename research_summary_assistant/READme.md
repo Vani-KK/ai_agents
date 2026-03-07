@@ -32,9 +32,9 @@ OPENAI_API_KEY=your_api_key_here
 
 ## Technologies Used:
 
--Python
--Requests library
--OpenAI API
--BeautifulSoup
+ - Python
+ - Requests library
+ - OpenAI API
+ - BeautifulSoup
 
  
