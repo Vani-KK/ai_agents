@@ -45,7 +45,7 @@ def research_agent():
 
     print("\nSummarizing...\n")
 
-    summary = summarize_text(article_text)
+    summary = summarize_text(article_text,topic,link)
 
     print("\nFINAL SUMMARY:\n")
     print(summary)
