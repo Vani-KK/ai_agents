@@ -1,16 +1,18 @@
-An AI-powered tool that searches for research articles online, reads the content, and generates a concise summary automatically.
+# Research Summary Assistant v2
+An upgraded AI research assistant with multi-source synthesis and a Streamlit web interface.
 
-This project demonstrates a simple AI agent pipeline that combines search, content retrieval, and summarization
+## Features
+- Searches web using DuckDuckGo
 
-## Features:
+- Reads and extracts 3 articles simultaneously
 
--Search for research articles on the web
+- Synthesizes multiple sources into structured report
 
--Retrieve article content
+- Streamlit web UI with download option
 
--Generate concise summaries
+- Uses LangChain and GPT-4o-mini
 
--Modular agent-like pipeline structure
+
 
 ## Installation
 
@@ -36,5 +38,6 @@ OPENAI_API_KEY=your_api_key_here
  - Requests library
  - OpenAI API
  - BeautifulSoup
+ - Streamlit
 
  
