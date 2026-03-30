@@ -1,14 +1,11 @@
 from search_tool import search_web
 from reader_tool import read_article
-from summarizer import summarize_text
-
+from summarizer import summarize_text, synthesize_research
 
 def research_agent():
-
     topic = input("Enter research topic: ")
 
     print("\nSearching the web...\n")
-
     results = search_web(topic)
 
     if len(results) == 0:
@@ -21,35 +18,39 @@ def research_agent():
         print(r["link"])
         print()
 
-    print("\nReading article...\n")
+    print("\nReading articles...\n")
 
-    article_text = None
+    # Collect up to 3 working articles
+    articles = []
 
-    # Try reading multiple links until one works
     for result in results:
+        if len(articles) >= 3:  # stop after 3 successful reads
+            break
+
         link = result["link"]
         print(f"Trying: {link}")
 
         text = read_article(link)
 
         if text and len(text) > 500:
-            article_text = text
-            print("Article extracted successfully.\n")
-            break
+            articles.append({"url": link, "text": text})
+            print(f"✅ Extracted successfully ({len(text)} chars)\n")
         else:
-            print("Failed to extract useful text.\n")
+            print("❌ Failed to extract useful text.\n")
 
-    if article_text is None:
-        print("Could not extract article text from any link.")
+    if len(articles) == 0:
+        print("Could not extract text from any link.")
         return
 
-    print("\nSummarizing...\n")
+    print(f"\nSuccessfully read {len(articles)} articles. Synthesizing...\n")
 
-    summary = summarize_text(article_text,topic,link)
+    # Synthesize all articles together
+    final_report = synthesize_research(articles, topic)
 
-    print("\nFINAL SUMMARY:\n")
-    print(summary)
-
+    print("\n" + "="*60)
+    print("FINAL RESEARCH REPORT")
+    print("="*60)
+    print(final_report)
 
 if __name__ == "__main__":
     research_agent()

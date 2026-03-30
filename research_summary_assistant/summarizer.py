@@ -43,3 +43,57 @@ ARTICLE:
     chain = prompt | llm
     result = chain.invoke({"text": text, "topic": topic, "source_url": source_url})
     return result.content
+
+def synthesize_research(articles, topic):
+    # Build a combined text block with source labels
+    combined = ""
+    for i, article in enumerate(articles):
+        combined += f"\n--- SOURCE {i+1}: {article['url']} ---\n"
+        combined += article["text"]
+        combined += "\n"
+
+    prompt = PromptTemplate(
+        input_variables=["combined", "topic"],
+        template="""
+You are an expert research analyst. You have been given content from multiple sources on the topic: {topic}
+
+Your job is to synthesize all sources into one unified research report.
+
+{combined}
+
+Respond in this exact format:
+
+RESEARCH REPORT: {topic}
+
+EXECUTIVE SUMMARY:
+2-3 sentences capturing the most important overall finding across all sources.
+
+KEY INSIGHTS:
+- Insight 1 (mention which source if relevant)
+- Insight 2
+- Insight 3
+- Insight 4
+- Insight 5
+
+POINTS OF AGREEMENT:
+What do all/most sources agree on?
+
+INTERESTING DIFFERENCES:
+Did any sources contradict or add unique perspectives? mention them.
+
+SIMPLE EXPLANATION:
+Explain the whole topic in 3 sentences for a complete beginner.
+
+KEY TERMS:
+- Term: definition
+- Term: definition
+- Term: definition
+
+SOURCES USED:
+List all source URLs
+"""
+    )
+
+    chain = prompt | llm
+    result = chain.invoke({"combined": combined, "topic": topic})
+    return result.content
