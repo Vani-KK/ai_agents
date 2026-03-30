@@ -2,8 +2,8 @@ from search_tool import search_web
 from reader_tool import read_article
 from summarizer import summarize_text, synthesize_research
 
-def research_agent():
-    topic = input("Enter research topic: ")
+def research_agent(topic):
+    
 
     print("\nSearching the web...\n")
     results = search_web(topic)
@@ -47,10 +47,9 @@ def research_agent():
     # Synthesize all articles together
     final_report = synthesize_research(articles, topic)
 
-    print("\n" + "="*60)
-    print("FINAL RESEARCH REPORT")
-    print("="*60)
-    print(final_report)
+    return final_report
 
 if __name__ == "__main__":
-    research_agent()
+    topic = input("Enter research topic: ")
+    result=research_agent(topic)
+    print(result)
