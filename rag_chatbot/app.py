@@ -339,6 +339,17 @@ else:
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
+            
+            # Only show sources for assistant messages
+            # AND only if answer was actually found
+            if message["role"] == "assistant" and "sources" in message:
+                if "couldn't find" not in message["content"].lower():
+                    st.markdown(f"📎 **Sources:** {', '.join(message['sources'])}")
+                    with st.expander("📚 View source chunks"):
+                        for i, chunk in enumerate(message["chunks"]):
+                            st.markdown(f"**Chunk {i+1}:**")
+                            st.write(chunk)
+                            st.divider()
     
     # Chat input - fixed at bottom
     if prompt := st.chat_input("Ask a question about your PDFs..."):
@@ -355,15 +366,20 @@ else:
                 answer = answer_question(prompt, chunks, sources)
             
             st.markdown(answer)
-            st.markdown(f" **Sources:** {', '.join(sources)}")
-            
-            # Show sources in expander
-            with st.expander("📚 View source chunks"):
-                for i, chunk in enumerate(chunks):
-                    st.markdown(f"**Chunk {i+1}:**")
-                    st.write(chunk)
-                    st.divider()
+
+            if "couldn't find" not in answer.lower():
+                st.markdown(f"📎 **Sources:** {', '.join(sources)}")
+                with st.expander("📚 View source chunks"):
+                    for i, chunk in enumerate(chunks):
+                        st.markdown(f"**Chunk {i+1}:**")
+                        st.write(chunk)
+                        st.divider()
         
         # Add assistant response to history
-        st.session_state.messages.append({"role": "assistant", "content": answer})
+        st.session_state.messages.append({
+            "role": "assistant", 
+            "content": answer,
+            "sources": sources,
+            "chunks": chunks
+        })
 
