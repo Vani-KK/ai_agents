@@ -6,7 +6,7 @@ import os
 model = SentenceTransformer('all-MiniLM-L6-v2')
 client = chromadb.PersistentClient(path="chroma_db")
 
-def index_pdf(pdf_path):
+def index_pdf(pdf_path,filename="document"):
     # Step 1: Read the PDF
     print("Reading PDF...")
     reader = PdfReader(pdf_path)
@@ -20,8 +20,8 @@ def index_pdf(pdf_path):
     # Step 2: Split into chunks
     print("Splitting into chunks...")
     chunks = []
-    chunk_size = 500  
-    overlap = 50      
+    chunk_size = 1000  
+    overlap = 100      
     
     for i in range(0, len(full_text), chunk_size - overlap):
         chunk = full_text[i:i + chunk_size]
@@ -35,11 +35,9 @@ def index_pdf(pdf_path):
     
     # Delete existing collection if it exists (fresh start each time)
     try:
-        client.delete_collection("pdf_collection")
+        collection = client.get_collection("pdf_collection")
     except:
-        pass
-    
-    collection = client.create_collection("pdf_collection")
+        collection = client.create_collection("pdf_collection")
     
     # Convert chunks to embeddings and store
     embeddings = model.encode(chunks).tolist()
@@ -47,8 +45,9 @@ def index_pdf(pdf_path):
     collection.add(
         documents=chunks,
         embeddings=embeddings,
-        ids=[f"chunk_{i}" for i in range(len(chunks))]
+        ids=[f"{filename}_chunk_{i}" for i in range(len(chunks))],
+        metadatas=[{"source": filename} for _ in chunks]
     )
     
-    print(f"Successfully indexed {len(chunks)} chunks!")
+    print(f"Successfully indexed {len(chunks)} chunks from {filename}!")
     return len(chunks)

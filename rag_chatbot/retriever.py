@@ -5,7 +5,7 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 client = chromadb.PersistentClient(path="chroma_db")
 
-def retrieve_relevant_chunks(question, n_results=3):
+def retrieve_relevant_chunks(question, n_results=5):
     # Convert the question to an embedding
     question_embedding = model.encode([question]).tolist()
     
@@ -20,5 +20,8 @@ def retrieve_relevant_chunks(question, n_results=3):
     
     
     chunks = results['documents'][0]
+
+    metadatas = results['metadatas'][0]
+    sources = list(set([m['source'] for m in metadatas]))  # unique sources only
     
-    return chunks
+    return chunks , sources
