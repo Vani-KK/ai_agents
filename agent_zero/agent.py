@@ -104,38 +104,29 @@ agent = create_react_agent(
     tools=tools
 )
 
-def run_agent(user_input: str) -> str:
+def run_agent(user_input: str) -> dict:
     result = agent.invoke({
         "messages": [{"role": "user", "content": user_input}]
     })
     
-    # Print all intermediate steps so we can see tool calls
-    print("\n--- Agent Steps ---")
+    # Extract tool calls and results for UI display
+    steps = []
     for message in result["messages"]:
         if hasattr(message, 'tool_calls') and message.tool_calls:
             for tool_call in message.tool_calls:
-                print(f"🔧 Tool Used: {tool_call['name']}")
-                print(f"   Input: {tool_call['args']}")
+                steps.append({
+                    "type": "tool_call",
+                    "tool": tool_call['name'],
+                    "input": tool_call['args']
+                })
         elif hasattr(message, 'name') and message.name:
-            print(f"📤 Tool Result from {message.name}: {message.content[:100]}...")
-    print("-------------------\n")
+            steps.append({
+                "type": "tool_result",
+                "tool": message.name,
+                "output": message.content[:200]  # first 200 chars
+            })
     
-    return result["messages"][-1].content
-
-if __name__ == "__main__":
-    print("Agent Zero - Ready")
-    print("Type 'quit' to exit\n")
-    
-    while True:
-        user_input = input("You: ")
-        
-        if user_input.lower() == "quit":
-            break
-            
-        if user_input.strip() == "":
-            continue
-        
-        print("\nThinking...\n")
-        answer = run_agent(user_input)
-        print(f"\nFinal Answer: {answer}\n")
-        print("-" * 50)
+    return {
+        "answer": result["messages"][-1].content,
+        "steps": steps
+    }
