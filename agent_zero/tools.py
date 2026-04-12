@@ -1,6 +1,8 @@
 from langchain.tools import tool
 from ddgs import DDGS
 import wikipedia
+from memory import save_memory, get_all_memories, get_memory
+
 
 @tool
 def search_web(query: str) -> str:
@@ -77,5 +79,40 @@ def calculator(expression: str) -> str:
     except Exception as e:
         return f"Calculation failed: {str(e)}"
     
-tools = [search_web, search_wikipedia, calculator]
 
+@tool
+def remember_fact(fact: str) -> str:
+    """
+    Save an important fact about the user to long term memory.
+    Use this when the user tells you something important like
+    their name, location, preferences, or any personal detail
+    they might want you to remember in future conversations.
+    Input format: 'key: value' for example 'user_name: Rithish'
+    or 'user_location: Kerala'
+    """
+    try:
+        # Split "user_name: Rithish" into key and value
+        if ":" in fact:
+            key, value = fact.split(":", 1)
+            save_memory(key.strip(), value.strip())
+            return f"Got it! I'll remember that {key.strip()} is {value.strip()}"
+        else:
+            save_memory(fact, fact)
+            return f"Remembered: {fact}"
+    except Exception as e:
+        return f"Failed to save memory: {str(e)}"
+
+@tool
+def recall_memories(query: str) -> str:
+    """
+    Retrieve facts from long term memory about the user.
+    Use this when the user asks about something you should
+    remember from previous conversations, like their name,
+    preferences, or past interactions.
+    Input should be what you want to recall.
+    """
+    memories = get_all_memories()
+    return memories
+
+# Updated tools list with memory tools
+tools = [search_web, search_wikipedia, calculator, remember_fact, recall_memories]

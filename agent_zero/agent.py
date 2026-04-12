@@ -87,29 +87,53 @@ import os
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
+from langchain_core.messages import SystemMessage
 from tools import tools
+from memory import get_all_memories
 
 load_dotenv()
 
-# Create the LLM
 llm = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0
 )
 
-# Create the agent using LangGraph
-# This is the modern replacement for the old AgentExecutor
 agent = create_react_agent(
     model=llm,
     tools=tools
 )
 
-def run_agent(user_input: str) -> dict:
-    result = agent.invoke({
-        "messages": [{"role": "user", "content": user_input}]
-    })
+def run_agent(user_input: str, chat_history: list = []) -> dict:
     
-    # Extract tool calls and results for UI display
+    # Load existing long term memories
+    long_term = get_all_memories()
+    
+    # System message tells agent who the user is before conversation starts
+    system_message = SystemMessage(content=f"""
+You are Agent Zero, a helpful AI assistant with memory capabilities.
+
+You have access to tools for web search, wikipedia, calculator, 
+and memory storage.
+
+IMPORTANT MEMORY INSTRUCTIONS:
+- If the user tells you their name, location, or any personal detail → 
+  use remember_fact tool to save it immediately
+- If the user asks about something from previous conversations → 
+  use recall_memories tool first
+- Always be personal and use the user's name if you know it
+
+WHAT YOU ALREADY KNOW ABOUT THIS USER:
+{long_term}
+""")
+    
+    # Combine system message + chat history + new message
+    messages = [system_message] + chat_history + [
+        {"role": "user", "content": user_input}
+    ]
+    
+    result = agent.invoke({"messages": messages})
+    
+    # Extract steps for UI display
     steps = []
     for message in result["messages"]:
         if hasattr(message, 'tool_calls') and message.tool_calls:
@@ -123,7 +147,7 @@ def run_agent(user_input: str) -> dict:
             steps.append({
                 "type": "tool_result",
                 "tool": message.name,
-                "output": message.content[:200]  # first 200 chars
+                "output": message.content[:200]
             })
     
     return {
