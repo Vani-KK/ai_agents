@@ -21,7 +21,9 @@ increasingly refined application materials.
 
 
 | 🔍 Job Analyst | HR Expert | Extracts skills, keywords, culture insights |
+
 | ✍️ Resume Tailor | Professional Resume Writer | Rewrites resume to match job perfectly |
+
 | 📝 Cover Letter Writer | Former Hiring Manager | Writes personalized cover letter |
 
 
